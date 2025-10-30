@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Application Compatibility Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Font Awesome (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+  <div class="app-table-container">
+    <h2><i class="fa-solid fa-list-check"></i> Application Compatibility Tracker</h2>
+
+    <div class="table-actions">
+      <button id="addRowBtn" class="add-btn"><i class="fa-solid fa-plus"></i> Add Row</button>
+      <button id="deleteRowBtn" class="delete-btn"><i class="fa-solid fa-trash"></i> Delete Row</button>
+    </div>
+
+    <table id="appTable">
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Application Name</th>
+          <th><i class="fa-solid fa-globe"></i> Web Platform</th>
+          <th><i class="fa-solid fa-mobile-screen-button"></i> Mobile Platform</th>
+          <th>Comments</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- Rows will load dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "appStatusData_v3";
+    const tableBody = document.getElementById("tableBody");
+    const addRowBtn = document.getElementById("addRowBtn");
+    const deleteRowBtn = document.getElementById("deleteRowBtn");
+
+    const defaultApps = [
+      "Knowledge Gym",
+      "Knowledge Empire",
+      "AI Conversation Coach",
+      "AI Knowledge Assistant",
+      "AI Job Interview Coach",
+      "AI Job Interview Coach Pro",
+      "SIT - Course Catalogue",
+      "SIT - Thinking Gym",
+      "SIT - e-DOC",
+      "Demo apps (3)",
+      "Knowledge Empire",
+      "AI Conversation Coach",
+      "Demo server apps (3)"
+    ];
+
+    function loadData() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : defaultApps.map(app => ({
+        app,
+        web: false,
+        mobile: false,
+        comments: "",
+        selected: false
+      }));
+    }
+
+    function saveData() {
+      const rows = Array.from(tableBody.querySelectorAll("tr")).map(row => ({
+        selected: row.querySelector(".select-row").checked,
+        app: row.querySelector(".app-name").innerText.trim(),
+        web: row.querySelector(".web-toggle").checked,
+        mobile: row.querySelector(".mobile-toggle").checked,
+        comments: row.querySelector(".comments").innerText.trim()
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+    }
+
+    function createRow(data) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="checkbox" class="select-row"></td>
+        <td contenteditable="true" class="app-name">${data.app}</td>
+        <td><label class="status"><input type="checkbox" class="status-input web-toggle" ${data.web ? "checked" : ""}><span class="status-pill" data-on="Working" data-off="Not Working"></span></label></td>
+        <td><label class="status"><input type="checkbox" class="status-input mobile-toggle" ${data.mobile ? "checked" : ""}><span class="status-pill" data-on="Working" data-off="Not Working"></span></label></td>
+        <td contenteditable="true" class="comments">${data.comments}</td>
+      `;
+      tableBody.appendChild(row);
+
+      // Restore selection
+      if (data.selected) row.querySelector(".select-row").checked = true;
+
+      // Attach listeners
+      row.querySelectorAll("input, td[contenteditable='true']").forEach(el => {
+        el.addEventListener("input", saveData);
+        el.addEventListener("change", saveData);
+        el.addEventListener("blur", saveData);
+      });
+    }
+
+    function renderTable() {
+      tableBody.innerHTML = "";
+      const data = loadData();
+      data.forEach(createRow);
+    }
+
+    addRowBtn.addEventListener("click", () => {
+      createRow({ app: "New Application", web: false, mobile: false, comments: "", selected: false });
+      saveData();
+    });
+
+    deleteRowBtn.addEventListener("click", () => {
+      const confirmed = confirm("Are you sure you want to delete selected rows?");
+      if (!confirmed) return;
+
+      const data = loadData().filter((_, i) => {
+        const row = tableBody.querySelectorAll("tr")[i];
+        return !row.querySelector(".select-row").checked;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      renderTable();
+    });
+
+    window.addEventListener("load", renderTable);
+  </script>
+</body>
+</html>

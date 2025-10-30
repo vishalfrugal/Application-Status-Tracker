@@ -50,9 +50,6 @@
       "SIT - Thinking Gym",
       "SIT - e-DOC",
       "Demo apps (3)",
-      "Knowledge Empire",
-      "AI Conversation Coach",
-      "Demo server apps (3)"
     ];
 
     function loadData() {
@@ -111,9 +108,6 @@
     });
 
     deleteRowBtn.addEventListener("click", () => {
-      const confirmed = confirm("Are you sure you want to delete selected rows?");
-      if (!confirmed) return;
-
       const data = loadData().filter((_, i) => {
         const row = tableBody.querySelectorAll("tr")[i];
         return !row.querySelector(".select-row").checked;

@@ -75,7 +75,7 @@ tbody tr {
 
 /* limit tbody height so only rows scroll */
 tbody {
-  max-height: 50vh; /* adjust as needed (e.g. 400px or 60vh) */
+  max-height: min(540px, 70vh);
   overflow-y: auto;
   overflow-x: hidden;
 }
